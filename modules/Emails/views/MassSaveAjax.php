@@ -148,7 +148,7 @@ class Emails_MassSaveAjax_View extends Vtiger_Footer_View {
 		$recordModel->set('documentids', json_encode($documentIds));
 		$recordModel->set('signature',$signature);
 
-		$recordModel->set('toemailinfo', $toMailInfo);
+		$recordModel->set('toemailinfo', json_encode($toMailInfo));
 		foreach($toMailInfo as $recordId=>$emailValueList) {
 			if($recordModel->getEntityType($recordId) == 'Users'){
 				$parentIds .= $recordId.'@-1|';

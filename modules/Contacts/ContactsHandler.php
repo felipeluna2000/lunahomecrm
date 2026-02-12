@@ -71,7 +71,7 @@ function Contacts_sendCustomerPortalLoginDetails($entityData){
 			$emailData = Contacts::getPortalEmailContents($entityData,$password,'LoginDetails');
 			$subject = $emailData['subject'];
 			if(empty($subject)) {
-				$subject = 'Customer Portal Login Details';
+				$subject = 'Praesto Customer Portal Login Details';
 			}
 
 			$contents = $emailData['body'];
