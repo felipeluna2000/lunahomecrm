@@ -79,8 +79,28 @@ class Oauth2_Usercallback_Callbacks {
 
         if (!isset($req['code'])) {
             // step 1
-            $authurl = $provider->getAuthorizationUrl(['access_type' => 'offline',  
-                'prompt' => 'consent']); /* this will force login each-time so refresh-token is obtained */
+			
+			global $site_URL,$current_user;
+            
+            $parsed_url = parse_url($site_URL);
+            $payload  = $parsed_url['host']."||".$current_user->id."||".$req['authfor']."||".$req['authservice'];
+            $state = base64_encode($payload);
+			
+			if(isset($req['interaction_required'])){
+				$authurl = $provider->getAuthorizationUrl([
+					'access_type' => 'offline',  
+					'state' => $state,
+					'prompt' => 'consent'
+				]); 
+			} else {
+				$authurl = $provider->getAuthorizationUrl([
+					'access_type' => 'offline',  
+					'state' => $state,
+					'prompt' => 'none'
+				]); 
+			}
+			
+			/* this will force login each-time so refresh-token is obtained */
             $_SESSION['oauth2state'] = $provider->getState();
             $_SESSION['oauth2for'] = isset($req['authfor']) ? $req['authfor'] : "";
             $_SESSION['oauth2svc'] = isset($req['authservice']) ? $req['authservice'] : "";
@@ -115,8 +135,27 @@ class Oauth2_Usercallback_Callbacks {
 
                 $oauth2for = isset($_SESSION['oauth2for']) ? $_SESSION['oauth2for'] : "";
                 $oauth2svc = isset($_SESSION['oauth2svc']) ? $_SESSION['oauth2svc'] : "";
-
-                if ($userinfo["email"] && $userinfo["email_verified"]) {
+				
+				if(($oauth2for == 'OutgoingServer' || $oauth2for == 'MailConverter' || $oauth2for == 'MailManager') && $oauth2svc == 'Office365') {
+					
+					$userinfo["email"] = $userinfo['mail'];
+					
+					if ($userinfo["email"]) {
+						$tokens = array("access_token" => $accessTokenValue, "refresh_token" => $refreshTokenValue);
+						$response = static::updateTokensFor($config, $oauth2for, $oauth2svc, $userinfo, $tokens, $accessTokenExpiresOn);
+						
+						if(!empty($response) && $oauth2for == 'MailConverter'){
+							unset($_SESSION['oauth2for']);
+							unset($_SESSION['oauth2state']);
+							unset($_SESSION['oauth2svc']);
+							
+							echo json_encode(array("scannerid" => $response['id']));
+							exit;
+							
+						}
+					}
+					
+				} else if ($userinfo["email"] && $userinfo["email_verified"]) {
                     $tokens = array("access_token" => $accessTokenValue, "refresh_token" => $refreshTokenValue);
                     static::updateTokensFor($config, $oauth2for, $oauth2svc, $userinfo, $tokens, $accessTokenExpiresOn);
                 }
@@ -221,9 +260,14 @@ class Oauth2_Usercallback_Callbacks {
         } else if ($oauth2for == "MailManager") {
 
             require_once "modules/MailManager/models/Mailbox.php";
-
-            $server = strcasecmp($oauth2svc, "Google") === 0? "imap.gmail.com" : "";
-            $proxy  = $server && isset($config["Proxies"]) && isset($config["Proxies"][$server])? $config["Proxies"][$server] : "";
+			
+			if (strcasecmp($oauth2svc, "Google") === 0) {
+                $server = "imap.gmail.com";
+			} else if (strcasecmp($oauth2svc, "Office365") === 0) {
+                $server = "imap.office365.com";
+			}
+			
+			$proxy  = $server && isset($config["Proxies"]) && isset($config["Proxies"][$server])? $config["Proxies"][$server] : "";
 
             if ($server) {
                 $mailbox = MailManager_Mailbox_Model::activeInstance();

@@ -117,6 +117,7 @@ class Oauth2_TokenRefresher_Handler {
                 $svc = null;
                 switch($record["mail_servername"]) {
                     case "imap.gmail.com": $svc = "Google"; break;
+					case "imap.office365.com": $svc = "Office365"; break;
                     default: continue;
                 }
                 try {

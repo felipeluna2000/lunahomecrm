@@ -16,6 +16,12 @@ return array(
         "clientId" => "867319045560-sk9prsbon35qt98ie3e83mf2pojh161r.apps.googleusercontent.com",
         "clientSecret" => "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",
     ),
+	
+    "Office365" => array(
+        "clientId" => "408e92f9-6755-45f3-a3e4-6fdee2a2577e",
+        "clientSecret" => "0be8Q~6Ud8AVJBZCOr3oitGX3VsKppJaGqO3~dv6",
+		"redirectUri" => 'https://oauth2.360vew.com' 
+    ),
 
     // Setup XOAUTH2 Imap Proxy Service
     // https://code.vtiger.com/vtiger/vtigercrm/-/issues/1914

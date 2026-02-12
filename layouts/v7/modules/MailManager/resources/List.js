@@ -120,11 +120,15 @@ Vtiger_List_Js("MailManager_List_Js", {}, {
 			var element = jQuery(e.currentTarget);
 			var serverType = element.val();
 			var useServer = '', useProtocol = '', useSSLType = '', useCert = '';
-			if (serverType == 'google-oauth2') {
+			if (serverType == 'google-oauth2' || serverType == 'Office365') {
 				settingContainer.find('.settings_details').addClass('hide');
 				settingContainer.find('.additional_settings').addClass('hide');
-				settingContainer.find('.modal-footer').addClass('hide');
-				window.location.href = "oauth2callback/index.php?authfor=MailManager&authservice=Google";
+				
+				//settingContainer.find('.modal-footer').addClass('hide');
+				settingContainer.find('.refresh_settings').addClass('hide');
+				
+				//window.location.href = "oauth2callback/index.php?authfor=MailManager&authservice=Google";
+			
 			} else if(serverType == 'gmail' || serverType == 'yahoo') {
 				useServer = 'imap.gmail.com';
 				if(serverType == 'yahoo') {
@@ -204,6 +208,31 @@ Vtiger_List_Js("MailManager_List_Js", {}, {
 		var settingContainer = jQuery(data);
 		settingContainer.find('#saveMailboxBtn').click(function(e) {
 			e.preventDefault();
+			
+			
+			var serverType = jQuery('#serverType').val();
+			
+			if(serverType == 'Office365' || serverType == 'google-oauth2'){
+				
+				if(serverType == 'Office365'){
+					var url = 'oauth2callback/index.php?authfor=MailManager&authservice=Office365';
+				} else {
+					var url = 'oauth2callback/index.php?authfor=MailManager&authservice=Google';
+				}
+				
+				window.open(url,'','height=600,width=600,channelmode=1');
+		
+				window.afterRedirect = function() {
+					
+					window.location.href = '/index.php?module='+app.getModuleName()+'&view=List';
+					
+				}
+				return;
+			}
+			
+			
+			
+			
 			var form = settingContainer.find('#EditView');
 			var data = form.serializeFormData();
 			var params = {
@@ -325,7 +354,8 @@ Vtiger_List_Js("MailManager_List_Js", {}, {
 			app.request.post({"data" : params}).then(function(error, responseData) {
 				for(var k in responseData){
 					var messageContent = responseData[k];
-					var messageEle = jQuery('#mmMailEntry_'+k);
+					//var messageEle = jQuery('#mmMailEntry_'+k);
+					var messageEle = jQuery('[id="mmMailEntry_' + k + '"]');
 					messageEle.find('.mmMailDesc').html(messageContent);
 				}
 			});
@@ -365,7 +395,8 @@ Vtiger_List_Js("MailManager_List_Js", {}, {
 							self.updateUnreadCount("-"+self.getUnreadCountByMsgNos(msgNos), folder);
 							self.updatePagingCount(msgNos.length);
 							for(var i = 0; i < msgNos.length; i++) {
-								container.find('#mmMailEntry_'+msgNos[i]).remove();
+								//container.find('#mmMailEntry_'+msgNos[i]).remove();
+								container.find('[id="mmMailEntry_' + msgNos[i] + '"]').remove();
 							}
 							var openedMsgNo = container.find('#mmMsgNo').val();
 							if(jQuery.inArray(openedMsgNo, msgNos) !== -1) {
@@ -430,7 +461,9 @@ Vtiger_List_Js("MailManager_List_Js", {}, {
 						self.updateUnreadCount("-"+unreadCount, folder);
 						self.updateUnreadCount("+"+unreadCount, moveToFolder);
 						for(var i = 0; i < msgNos.length; i++) {
-							container.find('#mmMailEntry_'+msgNos[i]).remove();
+						//	container.find('#mmMailEntry_'+msgNos[i]).remove();
+							container.find('[id="mmMailEntry_' + msgNos[i] + '"]').remove();
+
 						}
 						container.find('.moveToFolderDropDown').removeClass('open');
 					}
@@ -541,7 +574,8 @@ Vtiger_List_Js("MailManager_List_Js", {}, {
 		if(typeof msgNos == "object") {
 			for(var i = 0; i < msgNos.length; i++) {
 				var msgNo = msgNos[i];
-				var msgEle = container.find('#mmMailEntry_'+msgNo);
+				//var msgEle = container.find('#mmMailEntry_'+msgNo);
+				var msgEle = container.find('[id="mmMailEntry_' + msgNo + '"]');
 				msgEle.removeClass('mmReadEmail');
 				msgEle.data('read', "0");
 				var nameSubject = "<strong>" + msgEle.find('.nameSubjectHolder').html() + "</strong>";
@@ -559,7 +593,8 @@ Vtiger_List_Js("MailManager_List_Js", {}, {
 		if(typeof msgNos == "object") {
 			for(var i = 0; i < msgNos.length; i++) {
 				var msgNo = msgNos[i];
-				var msgEle = container.find('#mmMailEntry_'+msgNo);
+				//var msgEle = container.find('#mmMailEntry_'+msgNo);
+				var msgEle = container.find('[id="mmMailEntry_' + msgNo + '"]');
 				msgEle.addClass('mmReadEmail');
 				msgEle.data('read', "1");
 				var nameSubject = msgEle.find('.nameSubjectHolder').find('strong').html();
@@ -573,7 +608,10 @@ Vtiger_List_Js("MailManager_List_Js", {}, {
 		var self = this;
 		var container = self.getContainer();
 		for(var i = 0; i < msgNos.length; i++) {
-			var isRead = parseInt(container.find('#mmMailEntry_'+msgNos[i]).data('read'));
+			
+			var isRead = parseInt(container.find('[id="mmMailEntry_' + msgNos[i] + '"]').data('read'));
+
+			//var isRead = parseInt(container.find('#mmMailEntry_'+msgNos[i]).data('read'));
 			if(isRead == 0) {
 				count++;
 			}
@@ -756,7 +794,12 @@ Vtiger_List_Js("MailManager_List_Js", {}, {
 			element.find('.mmDateTimeValue').removeClass('mmListDateDivSelected');
 			element.addClass('fontBlack');
 		});
-		var selectedMailEle = container.find('#mmMailEntry_'+msgNo);
+		
+
+		var selectedMailEle = container.find('[id="mmMailEntry_' + msgNo + '"]');
+
+
+		//var selectedMailEle = container.find('#mmMailEntry_'+msgNo);
 		selectedMailEle.addClass('highLightMail');
 		selectedMailEle.removeClass('fontBlack');
 		selectedMailEle.addClass('whiteFont');
@@ -783,11 +826,21 @@ Vtiger_List_Js("MailManager_List_Js", {}, {
 			app.request.post({data : params}).then(function(err, data) {
 				app.helper.hideProgress();
 				var uiContent = data.ui;
-				container.find('#mmMailEntry_'+msgNo).addClass('mmReadEmail');
+				
+				var msgIdSelector = '[id="mmMailEntry_' + msgNo + '"]';
+
+				container.find(msgIdSelector).addClass('mmReadEmail');
+				container.find(msgIdSelector).data('read', "1");
+				
+				var nameSubject = container.find(msgIdSelector).find('.nameSubjectHolder').find('strong').html();
+				container.find(msgIdSelector).find('.nameSubjectHolder').html(nameSubject);
+
+
+				/*container.find('#mmMailEntry_'+msgNo).addClass('mmReadEmail');
 				container.find('#mmMailEntry_'+msgNo).data('read', "1");
 				var nameSubject = container.find('#mmMailEntry_'+msgNo).find('.nameSubjectHolder').find('strong').html();
 				container.find('#mmMailEntry_'+msgNo).find('.nameSubjectHolder').html(nameSubject);
-				container.find('#mailPreviewContainer').html(uiContent);
+				container.find('#mailPreviewContainer').html(uiContent);*/
 				self.registerMailDeleteEvent();
 				self.registerForwardEvent();
 				self.registerReplyEvent();
@@ -819,7 +872,10 @@ Vtiger_List_Js("MailManager_List_Js", {}, {
 				app.request.post({data : params}).then(function(err,data) {
 					app.helper.hideProgress();
 					if(data.status) {
-						container.find('#mmMailEntry_'+msgNo).remove();
+						//container.find('#mmMailEntry_'+msgNo).remove();
+						
+						var msgIdSelector = '[id="mmMailEntry_' + msgNo + '"]';
+						container.find(msgIdSelector).remove();
 						var previewHtml = '<div class="mmListMainContainer">\n\
 										<center><strong>'+app.vtranslate('JSLBL_NO_MAIL_SELECTED_DESC')+'</center></strong></div>';
 						jQuery('#mailPreviewContainer').html(previewHtml);

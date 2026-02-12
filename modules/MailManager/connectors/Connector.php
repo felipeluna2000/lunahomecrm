@@ -56,6 +56,11 @@ class MailManager_Connector_Connector {
 	 */
 	public static function connectorWithModel($model, $folder='') {
 		$server = $model->server();
+		
+		if($model->serverName() == 'Office365'){
+			return MailManager_Office365_Connector::connectorWithModel($model, $folder);
+		}
+		
 		$port = 143; // IMAP
 		if (strcasecmp($model->protocol(), 'pop') === 0) $port = 110; // NOT IMPLEMENTED
 		else if (strcasecmp($model->ssltype(), 'ssl') === 0) $port = 993; // IMAP SSL

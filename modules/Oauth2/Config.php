@@ -45,6 +45,29 @@ class Oauth2_Config implements ArrayAccess {
                     $config["scopes"] = 'openid email profile https://mail.google.com/'; /* space separated */
                 }
                 break;
+			
+	    case "OFFICE365" :
+                if (!isset($config["urlAuthorize"])) {
+                    $config["urlAuthorize"] = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize';
+                }
+                if (!isset($config["urlAccessToken"])) {
+                    $config["urlAccessToken"] = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
+                }
+                if (!isset($config["urlResourceOwnerDetails"])) {
+                    $config["urlResourceOwnerDetails"] = 'https://graph.microsoft.com/v1.0/me';
+                }
+                if (!isset($config["scopes"])) {
+					
+					if(isset($_REQUEST['authfor']) && ($_REQUEST['authfor'] == 'MailConverter' || $_REQUEST['authfor'] == 'MailManager')){
+						$config["scopes"] = 'offline_access User.Read Mail.Send Mail.ReadWrite'; /* space separated */
+                	} else if(isset($_REQUEST['authfor']) && ($_REQUEST['authfor'] == 'Login')){
+						$config["scopes"] = 'openid email profile'; /* space separated */
+                	} else {
+						$config["scopes"] = 'offline_access User.Read Mail.Send'; /* space separated */
+                	}
+					
+                }
+				break;
         }
 
         if (!isset($config["clientId"]) && isset($config["client_id"])) {

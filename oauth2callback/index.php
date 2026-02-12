@@ -22,5 +22,13 @@ require_once "modules/Oauth2/callbacks/Usercallback.php";
 
 (function() {
     $cfgdata = require_once __DIR__ . "/config.oauth2.php";
+	
+	if(isset($_POST['userid'])){
+        session_start();
+        $_SESSION['authenticated_user_id'] = $_POST['userid'];
+        $_SESSION['oauth2for'] = $_POST['authfor'];
+        $_SESSION['oauth2svc'] = $_POST['authservice'];
+    }
+	
     Oauth2_Usercallback_Callbacks::handleRequest(Oauth2_Config::loadConfig($cfgdata), $_REQUEST);
 })();

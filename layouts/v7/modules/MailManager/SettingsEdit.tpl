@@ -28,7 +28,8 @@
                                     <select id="serverType" class="select2 col-lg-9">
                                         <option></option>
                                         <option value='google-oauth2' {if $SERVERNAME eq 'gmail' && $AUTHTYPE eq 'XOAUTH2'} selected {/if}>{vtranslate('JSLBL_Gmail',$MODULE)} OAuth2</option>
-                                        {* Google stopped IMAP with password from Sep 30, 2024 *}
+                                        <option value='Office365' {if $SERVERNAME eq 'Office365'} selected {/if}>{vtranslate('Office365',$MODULE)}</option>
+										{* Google stopped IMAP with password from Sep 30, 2024 *}
                                         {* <option value='gmail' {if $SERVERNAME eq 'gmail'} selected {/if}>{vtranslate('JSLBL_Gmail',$MODULE)}</option> *}
                                         <option value='yahoo' {if $SERVERNAME eq 'yahoo'} selected {/if}>{vtranslate('JSLBL_Yahoo',$MODULE)}</option>
                                         <option value='fastmail' {if $SERVERNAME eq 'fastmail'} selected {/if}>{vtranslate('JSLBL_Fastmail',$MODULE)}</option>
