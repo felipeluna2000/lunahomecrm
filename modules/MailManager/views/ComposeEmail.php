@@ -202,6 +202,26 @@ class MailManager_ComposeEmail_View extends Vtiger_ComposeEmail_View {
 		$userPrevilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 		$viewer->assign('MODULE_IS_ACTIVE', $userPrevilegesModel->hasModulePermission(Vtiger_Module_Model::getInstance('EmailTemplates')->getId()));
 		//
+		
+		
+		global $adb;
+		$currentUser = Users_Record_Model::getCurrentUserModel();
+		$userId = $currentUser->getId();
+		$mail_accounts_result = $adb->pquery("SELECT * FROM vtiger_mail_accounts WHERE user_id=? and mail_servername = 'imap.office365.com'", array($userId));
+		if ($adb->num_rows($mail_accounts_result)) {
+		    for($u=0;$u<$adb->num_rows($mail_accounts_result);$u++){
+		        $MAIL_SERVERS[] = array(
+					'account_id' => $adb->query_result($mail_accounts_result, $u, 'account_id'),
+					'account_name' => $adb->query_result($mail_accounts_result, $u, 'mail_username')
+				);
+		    }
+		}
+		$viewer->assign('MAIL_ACCOUNTS', $MAIL_SERVERS);
+	
+		$system_email_result = $adb->pquery("select * from vtiger_systems where server_type = 'email'");
+		if($adb->num_rows($system_email_result)){
+			$viewer->assign('SYSTEM_EMAIL', $adb->query_result($system_email_result, 0, 'server_username'));
+		}
 
 		if ($relatedLoad) {
 			$viewer->assign('RELATED_LOAD', true);
