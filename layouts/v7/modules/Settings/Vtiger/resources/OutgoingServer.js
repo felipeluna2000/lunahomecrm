@@ -171,10 +171,18 @@ Vtiger.Class("Settings_Vtiger_OutgoingServer_Js", {}, {
 
 			var servertypevalue = form.find('[name="serverType"]').val();
 
-			if (servertypevalue === "google-oauth2") {
-				window.location.href = "oauth2callback/index.php?authfor=OutgoingServer&authservice=Google";
-			} else if (servertypevalue === "office365-oauth2") {
-				window.location.href = "oauth2callback/index.php?authfor=OutgoingServer&authservice=Office365";
+			if (servertypevalue === "google-oauth2" || servertypevalue === "office365-oauth2") {
+				var authservice = (servertypevalue === "office365-oauth2") ? "Office365" : "Google";
+				var url = "oauth2callback/index.php?authfor=OutgoingServer&authservice=" + authservice;
+
+				window.open(url, '', 'height=600,width=600,channelmode=1');
+
+				window.afterRedirect = function () {
+					app.helper.showSuccessNotification({ 'message': app.vtranslate('JS_OAUTH2_SUCCESS') || 'OAuth2 Authentication successful. Redirecting to settings...' });
+					setTimeout(function () {
+						window.location.href = 'index.php?module=' + app.getModuleName() + '&parent=' + app.getParentModuleName() + '&view=OutgoingServerDetail&_t=' + new Date().getTime();
+					}, 1000);
+				};
 			} else {
 				form.find('[name="server_username"]').val("");
 				form.find('[name="server_password"]').val("");

@@ -144,9 +144,6 @@ class Oauth2_Usercallback_Callbacks
                 $oauth2for = isset($_SESSION['oauth2for']) ? $_SESSION['oauth2for'] : "";
                 $oauth2svc = isset($_SESSION['oauth2svc']) ? $_SESSION['oauth2svc'] : "";
 
-                error_log("Oauth2_Usercallback_Callbacks::handleRequest: authfor=$oauth2for, authsvc=$oauth2svc");
-                error_log("Oauth2_Usercallback_Callbacks::handleRequest: userinfo=" . print_r($userinfo, true));
-
                 if (($oauth2for == 'OutgoingServer' || $oauth2for == 'MailConverter' || $oauth2for == 'MailManager') && $oauth2svc == 'Office365') {
 
                     $userinfo["email"] = $userinfo['mail'];
@@ -163,6 +160,8 @@ class Oauth2_Usercallback_Callbacks
                             echo json_encode(array("scannerid" => $response['id']));
                             exit;
                         }
+                    } else {
+                        error_log("Email was empty in userinfo for Office365.");
                     }
                 } else if ($userinfo["email"] && (!isset($userinfo["email_verified"]) || $userinfo["email_verified"])) {
                     $tokens = array("access_token" => $accessTokenValue, "refresh_token" => $refreshTokenValue);
@@ -179,7 +178,7 @@ class Oauth2_Usercallback_Callbacks
 
                 switch ($oauth2for) {
                     case "OutgoingServer":
-                        header("Location: {$crmBaseUrl}/index.php?parent=Settings&module=Vtiger&view=OutgoingServerDetail");
+                        header("Location: {$crmBaseUrl}/oauth2callback/redirect.php");
                         break;
                     case "MailConverter":
                         header("Location: {$crmBaseUrl}/index.php?parent=Settings&module=MailConverter&view=List");
